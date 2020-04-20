@@ -123,6 +123,7 @@ def get_tfidf(datapath):
             term_freq = words.count(word)
             tf_idf_value = term_freq * 1. / max_term_freq * idfs[word]
             words_tfidfs.append((word_IDs[word], tf_idf_value))
+            sum_squares += tf_idf_value ** 2
             
         words_tfidfs_normalized = [str(index) + ':' + str(tf_idf_value/np.sqrt(sum_squares))
                                     for index, tf_idf_value in words_tfidfs]
