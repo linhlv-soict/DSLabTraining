@@ -14,7 +14,7 @@ class RidgeRegression:
         assert len(X_train.shape) == 2 and X_train.shape[0] == Y_train.shape[0]
         Z = np.identity(X_train.shape[1])
         #Z[0][0] = 0
-        W = np.linalg.pinv(X_train.transpose().dot(X_train) + LAMBDA * Z).dot(X_train.transpose()).dot(Y_train)
+        W = np.linalg.inv(X_train.transpose().dot(X_train) + LAMBDA * Z).dot(X_train.transpose()).dot(Y_train)
         
         return W
     
@@ -57,9 +57,9 @@ class RidgeRegression:
             row_ids = np.array(range(X_train.shape[0]))
             #np.split() requires equal divisions
             valid_ids = np.split(row_ids[:len(row_ids) - len(row_ids) % num_folds], num_folds)
-            valid_ids[-1] = np.append(valid_ids[-1], row_ids[len(row_ids) - len(row_ids) * num_folds:])
+            valid_ids[-1] = np.append(valid_ids[-1], row_ids[len(row_ids) - len(row_ids) % num_folds:])
             train_ids = [[k for k in row_ids if k not in valid_ids[i]] for i in range(num_folds)]
-            averRSS = 0
+            averRSS = 0.0
             for i in range(num_folds):
                 valid_part = {'X': X_train[valid_ids[i]], 'Y': Y_train[valid_ids[i]]}
                 train_part = {'X': X_train[train_ids[i]], 'Y': Y_train[train_ids[i]]}
@@ -74,13 +74,14 @@ class RidgeRegression:
                 if averRSS < minimumRSS:
                     best_LAMBDA = current_LAMBDA
                     minimumRSS = averRSS
+                    #print(best_LAMBDA, minimumRSS)
             return best_LAMBDA, minimumRSS
         
         best_LAMBDA, minimumRSS = range_scan(best_LAMBDA = 0, minimumRSS = 1e+8, LAMBDA_values = range(50))
         
         LAMBDA_values = [k * 1./1000 for k in range(
                 max(0, best_LAMBDA - 1) *1000, (best_LAMBDA + 1)*1000, 1)] # step size = 0.001
-    
+
         best_LAMBDA, minimumRSS = range_scan(best_LAMBDA = best_LAMBDA, minimumRSS = minimumRSS, LAMBDA_values = LAMBDA_values)
         return best_LAMBDA
 
