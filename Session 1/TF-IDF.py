@@ -14,7 +14,7 @@ import numpy as np
 
 # Lay danh sach cac thu muc va newsgroup
 def gather_20newsgroups_data():
-    path = './datasets/20news-bydate/'
+    path = '../datasets/20news-bydate/'
     dirs = [path + dirname + '/'
             for dirname in os.listdir(path)
             if not os.path.isfile(path + dirname)]
@@ -25,7 +25,7 @@ def gather_20newsgroups_data():
     list_newsgroups.sort()
  
     # Thu thap du lieu
-    #with open('./datasets/20news-bydate/stopword.txt') as f:
+    #with open('../datasets/20news-bydate/stopword.txt') as f:
     #    stop_words = f.read().splitlines()
     stop_words = stopwords.words("english")
     stemmer = PorterStemmer()
@@ -58,11 +58,11 @@ def gather_20newsgroups_data():
             newsgroup_list = list_newsgroups
             )
     fulldata = train_data + test_data
-    with open('./datasets/20news-bydate/20news-train-processed.txt', 'w') as f:
+    with open('../datasets/20news-bydate/20news-train-processed.txt', 'w') as f:
         f.write('\n'.join(train_data))
-    with open('./datasets/20news-bydate/20news-test-processed.txt', 'w') as f:
+    with open('../datasets/20news-bydate/20news-test-processed.txt', 'w') as f:
         f.write('\n'.join(test_data))
-    with open('./datasets/20news-bydate/20news-full-processed.txt', 'w') as f:
+    with open('../datasets/20news-bydate/20news-full-processed.txt', 'w') as f:
         f.write('\n'.join(fulldata))
         
 # Tao tu dien va tinh gia tri idf
@@ -91,7 +91,7 @@ def generate_vocabulary(datapath):
         words_idfs.sort(key=lambda word: -word[1])
         
         print ('Vocabulary size: {}'.format(len(words_idfs)))
-        with open('./datasets/20news-bydate/words_idfs.txt', 'w') as f:
+        with open('../datasets/20news-bydate/words_idfs.txt', 'w') as f:
             f.write('\n'.join([word + '<fff>' + str(idf) for word, idf in words_idfs]))
 
 # Tien xu li: tinh tf-idf            
@@ -131,9 +131,9 @@ def get_tfidf(datapath):
         sparse_rep = ' '.join(words_tfidfs_normalized)
         data_tf_idf.append((label, doc_id, sparse_rep))
         
-    with open('./datasets/20news-bydate/data_tf_idf.txt', 'w') as f:
+    with open('../datasets/20news-bydate/data_tf_idf.txt', 'w') as f:
         f.write('\n'.join([str(label)+'<fff>'+str(word_id)+'<fff>'+sparse_rep for label,word_id,sparse_rep in data_tf_idf]))
 
 #gather_20newsgroups_data()
-#generate_vocabulary('./datasets/20news-bydate/20news-full-processed.txt')
-get_tfidf('./datasets/20news-bydate/20news-train-processed.txt')
+#generate_vocabulary('../datasets/20news-bydate/20news-full-processed.txt')
+get_tfidf('../datasets/20news-bydate/20news-train-processed.txt')

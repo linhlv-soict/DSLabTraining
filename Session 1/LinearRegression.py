@@ -106,7 +106,7 @@ def normalize_and_add_ones(X):
 
 
 if __name__ == '__main__':
-    X, Y = get_data(path='./datasets/death-rates-data.txt')
+    X, Y = get_data(path='../datasets/death-rates-data.txt')
     
     X = normalize_and_add_ones(X)
     X_train, Y_train = X[:50], Y[:50]
