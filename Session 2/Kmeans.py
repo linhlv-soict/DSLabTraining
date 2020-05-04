@@ -67,12 +67,34 @@ class Kmeans:
         if seed_val != self._num_clusters:
             self.__init__(seed_val)
             
-        idx = np.random.randint(0, high = len(self._data), size = self._num_clusters)
+        idx = np.random.choice(len(self._data), size = self._num_clusters, replace = False)
         print(idx)
         for i in idx:
-            self._E.append(self._data[i])
+            self._E.append(self._data[i]._r_d)
         for index, cluster in enumerate(self._clusters):
-            cluster._centroid = (self._E)[index]._r_d
+            cluster._centroid = (self._E)[index]
+
+    def kmeanspp_init(self, seed_val):
+        assert seed_val > 0
+        if seed_val != self._num_clusters:
+            self.__init__(seed_val)
+            
+        self._E.append(self._data[np.random.randint(len(self._data))]._r_d)
+        while len(self._E) < seed_val:
+            x = None
+            mins = 1.0
+            for member in self._data:
+                if not np.array([(member._r_d == centroid).all() for centroid in self._E]).any():
+                    pass
+                    s = max([self.compute_similarity(member, centroid) for centroid in self._E])
+                    if s < mins:
+                        mins = s
+                        x = member
+            self._E.append(x._r_d)
+            
+        for index, cluster in enumerate(self._clusters):
+            cluster._centroid = (self._E)[index]        
+        
         
     def compute_similarity(self, member, centroid):
         return np.dot(member._r_d, centroid)  # cosine distance; _rd, centroid are normalized
@@ -134,9 +156,13 @@ class Kmeans:
                 self._newS += maxs
     
     # chay thuat toan phan cum    
-    def run(self, seed_val, criterion, threshold):
-        self.random_init(seed_val)
-        
+    def run(self, seed_val, init, criterion, threshold):
+        assert init in ['kmeans++', 'random']
+        if init == 'random':
+            self.random_init(seed_val)
+        elif init == 'kmeans++':
+            self.kmeanspp_init(seed_val)
+            
         self._iteration = 0
         while True:
             
@@ -186,10 +212,11 @@ class Kmeans:
 if __name__ == '__main__':
     app = Kmeans(num_clusters = 20)
     app.load_data(data_path = '../datasets/20news-bydate/data_tf_idf.txt')
-    app.run(seed_val = 20, criterion = 'max_iters', threshold = 50)
+    app.run(seed_val = 20, init = 'random',criterion = 'max_iters', threshold = 50)
+    #app.run(seed_val = 20, init = 'kmeans++', criterion = 'max_iters', threshold = 50)
     print('Purity = ', app.compute_purity())
     print('NMI = ', app.compute_NMI())
     
-#    S =  2308.908640133885, converged
-#    Purity =  0.5473749337104472
-#    NMI =  0.005546672719213646
+#    S =  2287.011072715092, converged
+#    Purity =  0.5194449354781686
+#    NMI =  0.11471605835541569

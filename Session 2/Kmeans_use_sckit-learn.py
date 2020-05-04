@@ -5,14 +5,14 @@ Created on Fri May  1 14:04:28 2020
 @author: Linh LV
 """
 def sparse_to_dense(sparse_rd, vocab_size):
-            rd = [0.0 for _ in range(vocab_size)]
-            indices_tfidfs = sparse_rd.split()
+    rd = [0.0 for _ in range(vocab_size)]
+    indices_tfidfs = sparse_rd.split()
             
-            for idx in indices_tfidfs:
-                index = int(idx.split(':')[0])
-                tfidf = float(idx.split(':')[1])
-                rd[index] = tfidf
-            return rd
+    for idx in indices_tfidfs:
+        index = int(idx.split(':')[0])
+        tfidf = float(idx.split(':')[1])
+        rd[index] = tfidf
+    return rd
             
 
 def load_data(data_path):
