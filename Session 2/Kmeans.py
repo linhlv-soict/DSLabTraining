@@ -78,17 +78,18 @@ class Kmeans:
         assert seed_val > 0
         if seed_val != self._num_clusters:
             self.__init__(seed_val)
-            
+        
+        # khoi tao ngau nhien centroid thu nhat
         self._E.append(self._data[np.random.randint(len(self._data))]._r_d)
+        
         while len(self._E) < seed_val:
             x = None
             mins = 1.0
             for member in self._data:
-                if not np.array([(member._r_d == centroid).all() for centroid in self._E]).any():
-                    s = max([self.compute_similarity(member, centroid) for centroid in self._E])
-                    if s < mins:
-                        mins = s
-                        x = member
+                s = max([self.compute_similarity(member, centroid) for centroid in self._E])
+                if s < mins:
+                    mins = s
+                    x = member
             self._E.append(x._r_d)
             
         for index, cluster in enumerate(self._clusters):
@@ -134,7 +135,12 @@ class Kmeans:
         # kiem tra su thay doi cac centroid
         elif criterion == 'centroid':
             E_new = [list(cluster._centroid) for cluster in self._clusters]
-            Enew_minus_E = [centroid for centroid in E_new if centroid not in self._E]
+            
+            def is_in(centroid, E):
+                val = np.array([np.array(centroid == old_cen).all() for old_cen in E]).any()
+                return val
+            
+            Enew_minus_E = [centroid for centroid in E_new if not is_in(centroid, self._E)]
             self._E = E_new
             if len(Enew_minus_E) <= threshold:
                 return True
@@ -197,25 +203,31 @@ class Kmeans:
         I_val, H_omg, H_C, N = 0., 0., 0., len(self._data)
         for cluster in self._clusters:
             wk = len(cluster._members) * 1.
-            H_omg += -wk / N * np.log10(wk / N)
+            H_omg += - wk / N * np.log10(wk / N)
             member_labels = [member._label for member in cluster._members]
             for label in range(20):
                 wk_cj = member_labels.count(label) * 1.
                 cj = self._label_count[label]
                 I_val += wk_cj / N * np.log10(N * wk_cj / (wk * cj) + 1e-12)
-            for label in range(20):
-                cj = self._label_count[label] * 1.
-                H_C += -cj / N * np.log10(cj / N)
-            return I_val * 2. / (H_omg + H_C)
+        for label in range(20):
+            cj = self._label_count[label] * 1.
+            H_C += - cj / N * np.log10(cj / N)
+        return I_val * 2. / (H_omg + H_C)
         
 if __name__ == '__main__':
     app = Kmeans(num_clusters = 20)
     app.load_data(data_path = '../datasets/20news-bydate/data_tf_idf.txt')
-    app.run(seed_val = 20, init = 'random',criterion = 'max_iters', threshold = 50)
-    #app.run(seed_val = 20, init = 'kmeans++', criterion = 'max_iters', threshold = 50)
+    #app.run(seed_val = 20, init = 'random', criterion = 'similarity', threshold = 0.001)
+    app.run(seed_val = 20, init = 'kmeans++', criterion = 'max_iters', threshold = 30)
     print('Purity = ', app.compute_purity())
     print('NMI = ', app.compute_NMI())
+
+#   random init, criterion = similarity, threshold = 0.001    
+#   S =  2274.101081311421, converged
+#   Purity =  0.541364680926286
+#   NMI =  0.5406952464872724
     
-#    S =  2287.011072715092, converged
-#    Purity =  0.5194449354781686
-#    NMI =  0.11471605835541569
+#   kmeans++, max_iters = 30    
+#   S =  2275.753070443171
+#   Purity =  0.5466678451476047
+#   NMI =  0.5400450940838049
