@@ -25,7 +25,7 @@ def load_data(data_path):
     
     for line in dlines:
         features = line.split('<fff>')
-        label.append(features[0])
+        label.append(int(features[0]))
         data.append(sparse_to_dense(features[2], vocab_size))
         
     return data, label
@@ -38,8 +38,21 @@ def clustering_with_Kmeans():
     
     X = csr_matrix(data)
     
-    kmeans = KMeans(n_clusters = 20, init = 'k-means++', n_init = 5, tol = 1e-3, random_state = 2000).fit(X)
+    kmeans = KMeans(n_clusters = 20, init = 'random', n_init = 5, tol = 1e-3, random_state = 2000).fit(X)
     labels = kmeans.labels_
+    print('Purity = ', compute_purity(labels, label))
+    
+def compute_purity(labels, label):
+    purity = 0.0
+    for i in range(20):
+        member_labels = [label[k] for k in range(len(labels)) if labels[k] == i]
+        maxcount = max([member_labels.count(j) for j in range(20)])
+        purity += maxcount
+    purity *= 1.0/len(label)
+    return purity
     
 if __name__ == '__main__':    
     clustering_with_Kmeans()
+    
+#   purity = 0.4484709209828531
+    

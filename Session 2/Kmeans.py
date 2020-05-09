@@ -85,7 +85,6 @@ class Kmeans:
             mins = 1.0
             for member in self._data:
                 if not np.array([(member._r_d == centroid).all() for centroid in self._E]).any():
-                    pass
                     s = max([self.compute_similarity(member, centroid) for centroid in self._E])
                     if s < mins:
                         mins = s
