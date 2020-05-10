@@ -190,15 +190,17 @@ class Kmeans:
             self._iteration += 1   
             if self.stopping_condition(criterion, threshold):
                 break            
-        
+    
+    # tinh gia tri purity    
     def compute_purity(self):
         major_sum = 0.
         for cluster in self._clusters:
             member_labels = [member._label for member in cluster._members]
-            max_count = max([member_labels.count(label) for label in range(20)])
+            max_count = max([member_labels.count(label) for label in range(20)]) # dem so phan tu cua label xuat hien nhieu nhat trong moi cluster
             major_sum += max_count
         return major_sum * 1./len(self._data)
-        
+    
+    # tinh gia tri NMI    
     def compute_NMI(self):
         I_val, H_omg, H_C, N = 0., 0., 0., len(self._data)
         for cluster in self._clusters:
