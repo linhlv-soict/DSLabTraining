@@ -183,25 +183,25 @@ if __name__ == '__main__':
         for variable in trainable_variables:
             saved_value = restore_parameters(variable.name, epoch)
             assign_op = variable.assign(saved_value)
-            sess.run(assign_op)
+        sess.run(assign_op)
             
-            num_true_preds = 0
-            while True:
-                test_data, test_labels = test_data_reader.next_batch()
-                test_plabels_eval = sess.run(
-                    predicted_labels,
-                    feed_dict= {
-                            mlp._X: test_data,
-                            mlp._real_Y: test_labels
-                    }
-                )
-                matches = np.equal(test_plabels_eval, test_labels)
-                num_true_preds += np.sum(matches.astype(float))
+        num_true_preds = 0
+        while True:
+            test_data, test_labels = test_data_reader.next_batch()
+            test_plabels_eval = sess.run(
+                predicted_labels,
+                feed_dict= {
+                        mlp._X: test_data,
+                        mlp._real_Y: test_labels
+                }
+            )
+            matches = np.equal(test_plabels_eval, test_labels)
+            num_true_preds += np.sum(matches.astype(float))
                 
-                if test_data_reader._batch_id == 0:
-                    break
-            print ('Epoch: ', epoch)
-            print ('Accuracy on test data: ', num_true_preds/len(test_data_reader._data))
+            if test_data_reader._batch_id == 0:
+                break
+        print ('Epoch: ', epoch)
+        print ('Accuracy on test data: ', num_true_preds/len(test_data_reader._data))
     
     
     
