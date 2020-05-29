@@ -46,12 +46,12 @@ class MLP:
         logits = tf.matmul(hidden, weights_2) + biases_2
         
         labels_one_hot = tf.one_hot(indices= self._real_Y, depth= NUM_CLASSES, dtype = tf.float32)
-        loss = tf.nn.softmax_cross_entropy_with_logits(labels= labels_one_hot, logits= logits)
-        loss = tf.reduce_mean(loss)
+        loss = tf.nn.softmax_cross_entropy_with_logits(labels= labels_one_hot, logits= logits) # Measures the probability error in discrete classification tasks
+        loss = tf.reduce_mean(loss)  # equivalent to np.mean()
         
-        probs = tf.nn.softmax(logits)
-        predicted_labels = tf.argmax(probs, axis= 1)
-        predicted_labels = tf.squeeze(predicted_labels)
+        probs = tf.nn.softmax(logits)  # equivalent to tf.exp(logits) / tf.reduce_sum(tf.exp(logits), axis)
+        predicted_labels = tf.argmax(probs, axis= 1) # index of largest value across axis = 1
+        predicted_labels = tf.squeeze(predicted_labels)  # remove dimensions of size 1 from the shape of tensor
         
         return predicted_labels, loss
     
@@ -95,6 +95,7 @@ def restore_parameters(name, epoch):
     return value    
     
 class DataReader:
+    # Read data from file
     def __init__(self, data_path, batch_size, vocab_size):
         
         self._batch_size = batch_size
@@ -122,6 +123,7 @@ class DataReader:
         self._num_epoch = 0
         self._batch_id = 0
     
+    # Divide into batches
     def next_batch(self):
         start = self._batch_id * self._batch_size
         end = start + self._batch_size
