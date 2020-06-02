@@ -21,3 +21,6 @@ with tf.compat.v1.Session() as sess:
 #output = sess.run(result)
 #print (output)
 #sess.close()
+    
+with open('../datasets/20news-bydate/words_idfs.txt') as f:
+    vocab_size = len(f.read().splitlines())

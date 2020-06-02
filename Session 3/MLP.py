@@ -7,6 +7,7 @@ Created on Fri May 22 10:03:05 2020
 import numpy as np
 import random
 import tensorflow.compat.v1 as tf
+import matplotlib.pyplot as plt
 tf.disable_eager_execution()
 NUM_CLASSES = 20
 
@@ -142,6 +143,7 @@ class DataReader:
         return self._data[start:end], self._labels[start:end]
     
 if __name__ == '__main__':
+    f_out = open('output.txt','w')
     tf.reset_default_graph()
     with open('../datasets/20news-bydate/words_idfs.txt') as f:
         vocab_size = len(f.read().splitlines())
@@ -151,8 +153,10 @@ if __name__ == '__main__':
         hidden_size = 50)
 
     predicted_labels, loss = mlp.build_graph()
-    train_op = mlp.trainer(loss= loss, learning_rate= 0.1)
-
+    train_op = mlp.trainer(loss= loss, learning_rate= 0.05)
+    
+    steps = []
+    loss_evals = []
     with tf.Session() as sess:
         train_data_reader, test_data_reader = load_dataset()
         step, MAX_STEP = 0, 1000
@@ -167,14 +171,22 @@ if __name__ == '__main__':
                     }
             )
             step += 1
-            print ('step: {}, loss: {}'.format(step, loss_eval))
+            steps.append(step)
+            loss_evals.append(loss_eval)
+            f_out.write('step: {}, loss: {}'.format(step, loss_eval) + '\n')
+            
+        plt.plot(steps, loss_evals, 'g')
+        plt.xlabel('Epoch')
+        plt.ylabel('Loss')
+        plt.show()    
+        
+        #save parameters
         trainable_variables = tf.trainable_variables()
         for variable in trainable_variables:
             save_parameters(
                     name= variable.name,
                     value= variable.eval(),
                     epoch= train_data_reader._num_epoch)
-    
     # Evaluate model on test data
     with tf.Session() as sess:
         epoch = 4
@@ -183,7 +195,7 @@ if __name__ == '__main__':
         for variable in trainable_variables:
             saved_value = restore_parameters(variable.name, epoch)
             assign_op = variable.assign(saved_value)
-        sess.run(assign_op)
+            sess.run(assign_op)
             
         num_true_preds = 0
         while True:
@@ -200,10 +212,9 @@ if __name__ == '__main__':
                 
             if test_data_reader._batch_id == 0:
                 break
-        print ('Epoch: ', epoch)
-        print ('Accuracy on test data: ', num_true_preds/len(test_data_reader._data))
-    
-    
+        f_out.write('Epoch: {}'.format(epoch) + '\n')
+        f_out.write('Accuracy on test data: {}'.format(num_true_preds/len(test_data_reader._data)) )
+        f_out.close()
     
     
     
