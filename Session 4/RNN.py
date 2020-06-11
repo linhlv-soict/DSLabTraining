@@ -8,7 +8,7 @@ tf.disable_eager_execution()
 NUM_CLASSES = 20
 
 class RNN:
-    def __init__(self, vocab_size, embedding_size, lstm_size, pretrained_w2v_path, batch_size):
+    def __init__(self, vocab_size, embedding_size, lstm_size, batch_size):
         self._vocab_size = vocab_size
         self._embedding_size = embedding_size
         self._lstm_size = lstm_size
@@ -17,7 +17,7 @@ class RNN:
         self._data = tf.placeholder(tf.int32, shape=[batch_size, MAX_DOC_LENGTH])
         self._labels = tf.placeholder(tf.int32, shape=[batch_size, ])
         self._sentence_lengths = tf.placeholder(tf.int32, shape=[batch_size, ])
-        self._final_tokens = tf.placeholder(tf.int32, shape=[batch_size, ])
+        #self._final_tokens = tf.placeholder(tf.int32, shape=[batch_size, ])
     
     
     def embedding_layer(self, indices):
@@ -30,18 +30,18 @@ class RNN:
         
         pretrained_vectors = np.array(pretrained_vectors)    
         self._embedding_matrix = tf.get_variable(
-            name= 'embedding',
-            shape= (self._vocab_size + 2, self._embedding_size),
-            initializer= tf.constant_initializer(pretrained_vectors)
+             name= 'embedding',
+             shape= (self._vocab_size + 2, self._embedding_size),
+             initializer= tf.constant_initializer(pretrained_vectors)
         )
         
-        return tf.nn.embedding_layer(self._embedding_matrix, indices)
+        return tf.nn.embedding_lookup(self._embedding_matrix, indices)
     
     
     def LSTM_layer(self, embeddings):
-        lstm_cell = tf.contrib.rnn.BasicLSTMCell(self._lstm_size)
+        lstm_cell = tf.nn.rnn_cell.BasicLSTMCell(self._lstm_size)
         zero_state = tf.zeros(shape = (self._batch_size, self._lstm_size))
-        initial_state = tf.contrib.rnn.LSTMStateTuple(zero_state, zero_state)
+        initial_state = tf.nn.rnn_cell.LSTMStateTuple(zero_state, zero_state)
 
         lstm_inputs = tf.unstack(
             tf.transpose(embeddings, perm=[1, 0, 2])
@@ -51,7 +51,7 @@ class RNN:
             cell = lstm_cell,
             inputs = lstm_inputs,
             initial_state=initial_state,
-            squence_length = self._sentence_lengths
+            sequence_length = self._sentence_lengths
         ) #a length-500 list of [num_docs, lstm_size]
         
         lstm_outputs = tf.unstack(

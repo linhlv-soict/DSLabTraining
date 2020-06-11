@@ -2,6 +2,7 @@
 
 from data_reader import *
 from RNN import *
+import numpy as np
 import tensorflow.compat.v1 as tf
 tf.disable_eager_execution()
 
@@ -22,12 +23,12 @@ def train_and_evaluate_RNN():
 
     with tf.Session() as sess:
         train_data_reader = DataReader(
-            data_path= '../datasets/w2v/20news-train-raw.txt',
+            data_path= '../datasets/w2v/20news-train-encoded.txt',
             batch_size=50
         )
 
         test_data_reader = DataReader(
-                data_path= '../datasets/w2v/20news-test-raw.txt',
+                data_path= '../datasets/w2v/20news-test-encoded.txt',
                 batch_size=50
         )
 
@@ -38,27 +39,27 @@ def train_and_evaluate_RNN():
 
         while step < MAX_STEP:
             next_train_batch = train_data_reader.next_batch()
-            train_data, train_labels, train_sentence_lengths, train_final_tokens = next_train_batch
+            train_data, train_labels, train_sentence_lengths = next_train_batch
             plabels_eval, loss_eval, _ = sess.run(
                 [predicted_labels, loss, train_op],
                 feed_dict={
                     rnn._data: train_data,
                     rnn._labels: train_labels,
                     rnn._sentence_lengths: train_sentence_lengths,
-                    rnn._final_tokens: train_final_tokens
+                    #rnn._final_tokens: train_final_tokens
                 }
             )
             step += 1
             if step % 20 == 0:
                 print('loss: ', loss_eval)
 
-            # Khi het 1 epoch, danh gia tren test_data
+            # danh gia tren test data
             if train_data_reader._current_part == 0:
                 num_true_preds = 0
 
                 while True:
                     next_test_batch = test_data_reader.next_batch()
-                    test_data, test_labels, test_sentence_lengths, test_final_tokens = next_test_batch
+                    test_data, test_labels, test_sentence_lengths = next_test_batch
 
                     test_plabels_eval = sess.run(
                         predicted_labels,
@@ -66,7 +67,7 @@ def train_and_evaluate_RNN():
                             rnn._data: test_data,
                             rnn._labels: test_labels,
                             rnn._sentence_lengths: test_sentence_lengths,
-                            rnn._final_tokens: test_final_tokens
+                            #rnn._final_tokens: test_final_tokens
                         }
                     )
 
@@ -80,6 +81,6 @@ def train_and_evaluate_RNN():
                 print("Accuracy on test data: ", num_true_preds * 100. / len(test_data_reader._data))
 
 if __name__ == "__main__":
-    vocab_path = '../datasets/w2v/vocab-raw.txt'
-    train_and_evaluate_RNN(vocab_path, lstm_size=50, batch_size=50)
+    tf.reset_default_graph()
+    train_and_evaluate_RNN()
 
