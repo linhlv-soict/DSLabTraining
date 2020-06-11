@@ -52,4 +52,4 @@ class DataReader:
             random.shuffle(indices)
             self._data, self._labels = self._data[indices], self._labels[indices]
             
-        return self._data[start:end], self._labels[start:end]
+        return self._data[start:end], self._labels[start:end], final_tokens, sentence_lengths
